@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+{% block title %}Laporan — EduGuard AI{% endblock %}
+
+{% block content %}
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1">Laporan Monitoring</h4>
+        <p class="text-muted mb-0">Ringkasan statistik risiko putus sekolah</p>
+    </div>
+    <button onclick="window.print()" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-printer me-1"></i> Cetak Laporan
+    </button>
+</div>
+
+<!-- Kartu Ringkasan -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-3 text-center">
+            <p class="text-muted small mb-1">Total Siswa</p>
+            <h2 class="fw-bold mb-0">{{ total }}</h2>
+            <small class="text-muted">siswa terdaftar</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-3 text-center border-start border-danger border-3">
+            <p class="text-muted small mb-1">Risiko Tinggi</p>
+            <h2 class="fw-bold text-danger mb-0">{{ risiko_tinggi }}</h2>
+            <small class="text-muted">
+                {{ "%.1f"|format(risiko_tinggi / total * 100) if total > 0 else 0 }}% dari total
+            </small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-3 text-center border-start border-warning border-3">
+            <p class="text-muted small mb-1">Risiko Sedang</p>
+            <h2 class="fw-bold text-warning mb-0">{{ risiko_sedang }}</h2>
+            <small class="text-muted">
+                {{ "%.1f"|format(risiko_sedang / total * 100) if total > 0 else 0 }}% dari total
+            </small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-3 text-center border-start border-success border-3">
+            <p class="text-muted small mb-1">Risiko Rendah</p>
+            <h2 class="fw-bold text-success mb-0">{{ risiko_rendah }}</h2>
+            <small class="text-muted">
+                {{ "%.1f"|format(risiko_rendah / total * 100) if total > 0 else 0 }}% dari total
+            </small>
+        </div>
+    </div>
+</div>
+
+<!-- Grafik -->
+<div class="row g-3 mb-4">
+
+    <!-- Grafik Donut -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-4 h-100">
+            <h6 class="fw-bold mb-3">Distribusi Risiko</h6>
+            <canvas id="chartDonut"></canvas>
+        </div>
+    </div>
+
+    <!-- Grafik Bar per Kelas -->
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm p-4 h-100">
+            <h6 class="fw-bold mb-3">Risiko per Kelas</h6>
+            <canvas id="chartBar"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<!-- Tabel Rekap per Kelas -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <h6 class="fw-bold mb-3">📊 Rekap per Kelas</h6>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Kelas</th>
+                        <th>Total Siswa</th>
+                        <th>🔴 Tinggi</th>
+                        <th>🟡 Sedang</th>
+                        <th>🟢 Rendah</th>
+                        <th>Rata-rata Kehadiran</th>
+                        <th>Rata-rata Nilai</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for k in data_per_kelas %}
+                    <tr>
+                        <td><strong>{{ k.kelas }}</strong></td>
+                        <td>{{ k.total }}</td>
+                        <td>
+                            <span class="badge bg-danger">{{ k.tinggi }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-warning text-dark">{{ k.sedang }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-success">{{ k.rendah }}</span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress flex-grow-1" style="height:6px">
+                                    <div class="progress-bar
+                                        {% if k.rata_kehadiran < 75 %}bg-danger
+                                        {% elif k.rata_kehadiran < 85 %}bg-warning
+                                        {% else %}bg-success{% endif %}"
+                                         style="width:{{ k.rata_kehadiran }}%">
+                                    </div>
+                                </div>
+                                <small>{{ k.rata_kehadiran }}%</small>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="fw-semibold
+                                {% if k.rata_nilai < 65 %}text-danger
+                                {% elif k.rata_nilai < 75 %}text-warning
+                                {% else %}text-success{% endif %}">
+                                {{ k.rata_nilai }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-3">
+                            Belum ada data siswa
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Tabel Siswa Prioritas Intervensi -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <h6 class="fw-bold mb-3">
+            ⚠️ Daftar Siswa Prioritas Intervensi
+            <span class="badge bg-danger ms-2">{{ siswa_tinggi|length }}</span>
+        </h6>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>NIS</th>
+                        <th>Nama Siswa</th>
+                        <th>Kelas</th>
+                        <th>Kehadiran</th>
+                        <th>Nilai</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in siswa_tinggi %}
+                    <tr>
+                        <td class="text-muted">{{ s.nis }}</td>
+                        <td><strong>{{ s.nama }}</strong></td>
+                        <td>{{ s.kelas }}</td>
+                        <td>
+                            <span class="text-danger fw-semibold">
+                                {{ s.kehadiran }}%
+                            </span>
+                        </td>
+                        <td>
+                            <span class="text-danger fw-semibold">
+                                {{ s.nilai }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('detail_siswa', nis=s.nis) }}"
+                               class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-eye me-1"></i>Detail
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-3">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Tidak ada siswa dengan risiko tinggi
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Data dari Flask
+    const labelKelas  = {{ kelas_list | tojson }};
+    const dataTinggi  = {{ data_per_kelas | map(attribute='tinggi') | list | tojson }};
+    const dataSedang  = {{ data_per_kelas | map(attribute='sedang') | list | tojson }};
+    const dataRendah  = {{ data_per_kelas | map(attribute='rendah') | list | tojson }};
+
+    // Grafik Donut
+    new Chart(document.getElementById('chartDonut'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Risiko Tinggi', 'Risiko Sedang', 'Risiko Rendah'],
+            datasets: [{
+                data: [{{ risiko_tinggi }}, {{ risiko_sedang }}, {{ risiko_rendah }}],
+                backgroundColor: ['#dc3545', '#ffc107', '#198754'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            cutout: '65%',
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+
+    // Grafik Bar per Kelas
+    new Chart(document.getElementById('chartBar'), {
+        type: 'bar',
+        data: {
+            labels: labelKelas,
+            datasets: [
+                {
+                    label: 'Risiko Tinggi',
+                    data: dataTinggi,
+                    backgroundColor: '#dc3545'
+                },
+                {
+                    label: 'Risiko Sedang',
+                    data: dataSedang,
+                    backgroundColor: '#ffc107'
+                },
+                {
+                    label: 'Risiko Rendah',
+                    data: dataRendah,
+                    backgroundColor: '#198754'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom' } },
+            scales: {
+                x: { stacked: false },
+                y: { 
+                    stacked: false,
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 }
+                }
+            }
+        }
+    });
+</script>
+
+<!-- CSS khusus print -->
+<style>
+    @media print {
+        .sidebar, .navbar-top, button, .btn { display: none !important; }
+        .main-content { margin-left: 0 !important; }
+    }
+</style>
+{% endblock %}
