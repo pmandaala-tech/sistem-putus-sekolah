@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — EduGuard AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a3a5c 0%, #0d2137 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .logo-area {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #1a3a5c, #2d6a9f);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+        }
+        .form-control:focus {
+            border-color: #1a3a5c;
+            box-shadow: 0 0 0 0.2rem rgba(26,58,92,0.15);
+        }
+        .btn-login {
+            background: linear-gradient(135deg, #1a3a5c, #2d6a9f);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            width: 100%;
+            transition: opacity 0.2s;
+        }
+        .btn-login:hover {
+            opacity: 0.9;
+            color: white;
+        }
+        .input-group-text {
+            background: #f8f9fa;
+            border-right: none;
+        }
+        .form-control {
+            border-left: none;
+        }
+        .form-control:focus {
+            border-left: none;
+        }
+        /* Hint akun demo */
+        .demo-accounts {
+            background: #f0f7ff;
+            border: 1px solid #cce0ff;
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin-top: 20px;
+            font-size: 0.82rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    
+    <!-- Logo & Judul -->
+    <div class="logo-area">
+        <div class="logo-icon">
+            <i class="bi bi-shield-check text-white fs-2"></i>
+        </div>
+        <h4 class="fw-bold mb-1">EduGuard AI</h4>
+        <p class="text-muted small mb-0">
+            Sistem Prediksi Risiko Putus Sekolah
+        </p>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show py-2 small" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Form Login -->
+    <form method="POST" action="{{ url_for('login') }}">
+        
+        <!-- Username -->
+        <div class="mb-3">
+            <label class="form-label fw-semibold small">Username</label>
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="bi bi-person text-muted"></i>
+                </span>
+                <input type="text" 
+                       name="username" 
+                       class="form-control" 
+                       placeholder="Masukkan username"
+                       autofocus required>
+            </div>
+        </div>
+
+        <!-- Password -->
+        <div class="mb-3">
+            <label class="form-label fw-semibold small">Password</label>
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="bi bi-lock text-muted"></i>
+                </span>
+                <input type="password" 
+                       name="password" 
+                       id="passwordInput"
+                       class="form-control" 
+                       placeholder="Masukkan password"
+                       required>
+                <button class="btn btn-outline-secondary" 
+                        type="button"
+                        onclick="togglePassword()">
+                    <i class="bi bi-eye" id="eyeIcon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Remember Me -->
+        <div class="mb-4">
+            <div class="form-check">
+                <input class="form-check-input" 
+                       type="checkbox" 
+                       name="remember" 
+                       id="remember">
+                <label class="form-check-label small" for="remember">
+                    Ingat saya
+                </label>
+            </div>
+        </div>
+
+        <!-- Tombol Login -->
+        <button type="submit" class="btn btn-login">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Masuk
+        </button>
+
+    </form>
+
+    <!-- Info Akun Demo -->
+    <div class="demo-accounts">
+        <p class="fw-semibold mb-2 text-primary">
+            <i class="bi bi-info-circle me-1"></i>Akun Demo:
+        </p>
+        <div class="row g-1">
+            <div class="col-12">
+                <code>admin</code> / <code>admin123</code> 
+                <span class="text-muted">— Administrator</span>
+            </div>
+            <div class="col-12">
+                <code>bk</code> / <code>bk123</code> 
+                <span class="text-muted">— Guru BK</span>
+            </div>
+            <div class="col-12">
+                <code>kepsek</code> / <code>kepsek123</code> 
+                <span class="text-muted">— Kepala Sekolah</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <p class="text-center text-muted small mt-4 mb-0">
+        © 2026 EduGuard AI — LIDM 2026
+    </p>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Toggle show/hide password
+    function togglePassword() {
+        const input = document.getElementById('passwordInput');
+        const icon  = document.getElementById('eyeIcon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'bi bi-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'bi bi-eye';
+        }
+    }
+</script>
+</body>
+</html>

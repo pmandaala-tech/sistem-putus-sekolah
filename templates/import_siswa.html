@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+{% block title %}Import Siswa — EduGuard AI{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+    <a href="{{ url_for('daftar_siswa') }}"
+       class="btn btn-sm btn-outline-secondary mb-3">
+        <i class="bi bi-arrow-left me-1"></i>Kembali ke Daftar Siswa
+    </a>
+    <h4 class="fw-bold mb-1">Import Data Siswa</h4>
+    <p class="text-muted mb-0">
+        Upload file Excel atau CSV untuk menambah data siswa secara massal
+    </p>
+</div>
+
+<div class="row g-4">
+
+    <!-- Form Upload -->
+    <div class="col-md-7">
+        <div class="card border-0 shadow-sm p-4">
+            <h6 class="fw-bold mb-3">
+                <i class="bi bi-upload me-2 text-primary"></i>Upload File
+            </h6>
+
+            {% if not selesai %}
+            <form method="POST" action="{{ url_for('import_siswa') }}"
+                  enctype="multipart/form-data">
+
+                <!-- Area Upload -->
+                <div class="border-2 border-dashed rounded-3 p-4 text-center mb-3"
+                     style="border-color: #dee2e6; cursor: pointer;"
+                     onclick="document.getElementById('fileInput').click()">
+                    <i class="bi bi-file-earmark-excel fs-1 text-success mb-2 d-block"></i>
+                    <p class="mb-1 fw-semibold">Klik untuk pilih file</p>
+                    <p class="text-muted small mb-0">
+                        Format yang didukung: .xlsx, .xls, .csv
+                    </p>
+                    <p class="text-muted small" id="namaFile">
+                        Belum ada file dipilih
+                    </p>
+                </div>
+
+                <input type="file" id="fileInput" name="file"
+                       accept=".xlsx,.xls,.csv"
+                       class="d-none"
+                       onchange="tampilkanNamaFile(this)">
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-upload me-1"></i>Import Sekarang
+                    </button>
+                    <a href="{{ url_for('download_template') }}"
+                       class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-download me-1"></i>Download Template
+                    </a>
+                </div>
+            </form>
+
+            {% else %}
+            <!-- Hasil Import -->
+            <div class="text-center py-3">
+                <i class="bi bi-check-circle-fill text-success fs-1 mb-3 d-block"></i>
+                <h5 class="fw-bold mb-3">Import Selesai!</h5>
+
+                <div class="row g-2 mb-4">
+                    <div class="col-4">
+                        <div class="bg-success bg-opacity-10 rounded p-3">
+                            <h3 class="fw-bold text-success mb-0">{{ berhasil }}</h3>
+                            <small class="text-muted">Berhasil</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="bg-warning bg-opacity-10 rounded p-3">
+                            <h3 class="fw-bold text-warning mb-0">{{ duplikat }}</h3>
+                            <small class="text-muted">Dilewati</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="bg-danger bg-opacity-10 rounded p-3">
+                            <h3 class="fw-bold text-danger mb-0">{{ gagal }}</h3>
+                            <small class="text-muted">Gagal</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 justify-content-center">
+                    <a href="{{ url_for('daftar_siswa') }}"
+                       class="btn btn-primary btn-sm">
+                        <i class="bi bi-people me-1"></i>Lihat Daftar Siswa
+                    </a>
+                    <a href="{{ url_for('import_siswa') }}"
+                       class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-upload me-1"></i>Import Lagi
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Error Log -->
+        {% if errors %}
+        <div class="card border-0 shadow-sm p-4 mt-3">
+            <h6 class="fw-bold mb-3 text-danger">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                Log Error ({{ errors|length }})
+            </h6>
+            <div style="max-height: 200px; overflow-y: auto;">
+                {% for error in errors %}
+                <div class="alert alert-warning py-1 px-2 mb-1 small">
+                    <i class="bi bi-x-circle me-1"></i>{{ error }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Panduan -->
+    <div class="col-md-5">
+        <div class="card border-0 shadow-sm p-4">
+            <h6 class="fw-bold mb-3">
+                <i class="bi bi-info-circle me-2 text-primary"></i>
+                Panduan Import
+            </h6>
+
+            <p class="small text-muted mb-3">
+                Pastikan file Excel/CSV kamu memiliki kolom berikut:
+            </p>
+
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered small mb-3">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Kolom</th>
+                            <th>Keterangan</th>
+                            <th>Nilai</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>nis</code></td>
+                            <td>Nomor Induk Siswa</td>
+                            <td>Unik</td>
+                        </tr>
+                        <tr>
+                            <td><code>nama</code></td>
+                            <td>Nama lengkap</td>
+                            <td>Teks</td>
+                        </tr>
+                        <tr>
+                            <td><code>kelas</code></td>
+                            <td>Kelas siswa</td>
+                            <td>X-A, XI-B, dll</td>
+                        </tr>
+                        <tr>
+                            <td><code>kehadiran</code></td>
+                            <td>Tingkat kehadiran</td>
+                            <td>0 - 100</td>
+                        </tr>
+                        <tr>
+                            <td><code>nilai</code></td>
+                            <td>Nilai rata-rata</td>
+                            <td>0 - 100</td>
+                        </tr>
+                        <tr>
+                            <td><code>ekonomi</code></td>
+                            <td>Kondisi ekonomi</td>
+                            <td>0=Rendah, 1=Sedang, 2=Tinggi</td>
+                        </tr>
+                        <tr>
+                            <td><code>jarak_km</code></td>
+                            <td>Jarak rumah (km)</td>
+                            <td>Angka</td>
+                        </tr>
+                        <tr>
+                            <td><code>ortu_terlibat</code></td>
+                            <td>Keterlibatan ortu</td>
+                            <td>0=Tidak, 1=Ya</td>
+                        </tr>
+                        <tr>
+                            <td><code>mengulang</code></td>
+                            <td>Pernah mengulang</td>
+                            <td>0=Tidak, 1=1x, 2=2x+</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="alert alert-info py-2 small mb-0">
+                <i class="bi bi-lightbulb me-1"></i>
+                <strong>Tips:</strong> Download template Excel terlebih dahulu 
+                agar format sudah sesuai. Risiko akan dihitung otomatis 
+                menggunakan model ML!
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function tampilkanNamaFile(input) {
+        const nama = input.files[0]?.name || 'Belum ada file dipilih';
+        document.getElementById('namaFile').textContent = nama;
+    }
+</script>
+{% endblock %}
