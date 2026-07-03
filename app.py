@@ -16,7 +16,10 @@ app.secret_key = 'rahasia123'
 # =============================================
 # KONFIGURASI DATABASE MYSQL
 # =============================================
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost:3307/eduguard'
+import os
+
+# Ganti bagian SQLALCHEMY_DATABASE_URI di app.py Anda dengan ini:
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://uxuu7ircb8ocviwa:7nF1bhRI13rhsCbwRsnZ@bqlvdhriqqy6xljt661s-mysql.services.clever-cloud.com:3306/bqlvdhriqqy6xljt661s'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
