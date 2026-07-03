@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends 'base.html' %}
 {% block title %}Daftar Siswa — EduGuard{% endblock %}
 
@@ -211,4 +212,219 @@
     document.getElementById('filterKelas').addEventListener('change', filterTable);
     document.getElementById('filterRisiko').addEventListener('change', filterTable);
 </script>
+=======
+{% extends 'base.html' %}
+{% block title %}Daftar Siswa — EduGuard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1">Daftar Semua Siswa</h4>
+        <p class="text-muted mb-0">Total <strong>{{ siswa|length }}</strong> siswa terdaftar</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('input_siswa') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i>Tambah Siswa Baru
+        </a>
+        <a href="{{ url_for('import_siswa') }}" class="btn btn-outline-success btn-sm">
+            <i class="bi bi-file-earmark-excel me-1"></i>Import Excel/CSV
+        </a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm p-3 mb-3">
+    <div class="row g-2">
+        <div class="col-md-4">
+            <input type="text" id="searchInput"
+                   class="form-control form-control-sm"
+                   placeholder="🔍 Cari nama atau NIS...">
+        </div>
+        <div class="col-md-3">
+            <select id="filterKelas" class="form-select form-select-sm">
+                <option value="">Semua Kelas</option>
+                <option>X-A</option>
+                <option>X-B</option>
+                <option>XI-A</option>
+                <option>XI-B</option>
+                <option>XII-A</option>
+                <option>XII-B</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select id="filterRisiko" class="form-select form-select-sm">
+                <option value="">Semua Risiko</option>
+                <option value="TINGGI">🔴 Risiko Tinggi</option>
+                <option value="SEDANG">🟡 Risiko Sedang</option>
+                <option value="RENDAH">🟢 Risiko Rendah</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" id="tableSiswa">
+            <thead class="table-light">
+                <tr>
+                    <th>NIS</th>
+                    <th>Nama Siswa</th>
+                    <th>Kelas</th>
+                    <th>Kehadiran</th>
+                    <th>Nilai Rata-rata</th>
+                    <th>Status Risiko</th>
+                    <th class="text-center">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in siswa %}
+                <tr class="siswa-row"
+                    data-nama="{{ s.nama }}"
+                    data-nis="{{ s.nis }}"
+                    data-kelas="{{ s.kelas }}"
+                    data-risiko="{{ s.risiko }}">
+                    <td>
+                        <span class="text-muted fw-semibold">{{ s.nis }}</span>
+                    </td>
+                    <td>
+                        <strong class="text-dark">{{ s.nama }}</strong>
+                    </td>
+                    <td>{{ s.kelas }}</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="progress" style="height:6px; min-width:80px">
+                                <div class="progress-bar
+                                    {% if s.kehadiran < 75 %}bg-danger
+                                    {% elif s.kehadiran < 85 %}bg-warning
+                                    {% else %}bg-success{% endif %}"
+                                     style="width:{{ s.kehadiran }}%">
+                                </div>
+                            </div>
+                            <small class="
+                                {% if s.kehadiran < 75 %}text-danger
+                                {% elif s.kehadiran < 85 %}text-warning
+                                {% else %}text-success{% endif %}">
+                                {{ s.kehadiran }}%
+                            </small>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="fw-semibold
+                            {% if s.nilai < 65 %}text-danger
+                            {% elif s.nilai < 75 %}text-warning
+                            {% else %}text-success{% endif %}">
+                            {{ s.nilai }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if s.risiko == 'TINGGI' %}
+                            <span class="badge bg-danger">🔴 Tinggi</span>
+                        {% elif s.risiko == 'SEDANG' %}
+                            <span class="badge bg-warning text-dark">🟡 Sedang</span>
+                        {% else %}
+                            <span class="badge bg-success">🟢 Rendah</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <a href="{{ url_for('detail_siswa', nis=s.nis) }}"
+                           class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-eye me-1"></i>Detail
+                        </a>
+
+                        <a href="{{ url_for('edit_siswa', nis=s.nis) }}"
+                           class="btn btn-outline-warning btn-sm ms-1">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+
+                        {% if current_user.role in ['admin', 'guru_bk'] %}
+                        <button class="btn btn-outline-danger btn-sm ms-1"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modalHapus"
+                                data-nis="{{ s.nis }}"
+                                data-nama="{{ s.nama }}"
+                                onclick="isiModalHapus(this)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">
+                        <i class="bi bi-folder-x fs-3 d-block mb-2"></i>
+                        Belum ada data siswa.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalHapus" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="modal-title fw-bold text-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Hapus Siswa
+                </h6>
+                <button type="button" class="btn-close" 
+                        data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" id="formHapusSiswa" action="">
+                <div class="modal-body text-center">
+                    <p class="mb-1">Yakin ingin menghapus data siswa:</p>
+                    <p class="fw-bold fs-6 mb-1" id="hapusNamaSiswa"></p>
+                    <p class="text-muted small mb-0">
+                        Tindakan ini tidak bisa dibatalkan!
+                    </p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-secondary btn-sm"
+                            data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        <i class="bi bi-trash me-1"></i>Hapus
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function isiModalHapus(btn) {
+        const nis  = btn.dataset.nis;
+        const nama = btn.dataset.nama;
+
+        document.getElementById('hapusNamaSiswa').textContent = nama;
+        document.getElementById('formHapusSiswa').action = `/siswa/hapus/${nis}`;
+    }
+
+    function filterTable() {
+        const search       = document.getElementById('searchInput').value.toLowerCase();
+        const filterKelas  = document.getElementById('filterKelas').value;
+        const filterRisiko = document.getElementById('filterRisiko').value;
+        const rows         = document.querySelectorAll('.siswa-row');
+
+        rows.forEach(row => {
+            const nama   = row.dataset.nama.toLowerCase();
+            const nis    = row.dataset.nis.toLowerCase();
+            const kelas  = row.dataset.kelas;
+            const risiko = row.dataset.risiko;
+
+            const matchSearch = nama.includes(search) || nis.includes(search);
+            const matchKelas  = filterKelas  === '' || kelas  === filterKelas;
+            const matchRisiko = filterRisiko === '' || risiko === filterRisiko;
+
+            row.style.display = (matchSearch && matchKelas && matchRisiko)
+                                ? '' : 'none';
+        });
+    }
+
+    document.getElementById('searchInput').addEventListener('keyup', filterTable);
+    document.getElementById('filterKelas').addEventListener('change', filterTable);
+    document.getElementById('filterRisiko').addEventListener('change', filterTable);
+</script>
+>>>>>>> a5eefe7d6f462e64ca378ddb8e53e2b9eaebe80b
 {% endblock %}

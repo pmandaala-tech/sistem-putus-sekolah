@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends 'base.html' %}
 {% block title %}Pengaturan — EduGuard AI{% endblock %}
 
@@ -376,4 +377,384 @@
         document.getElementById('formHapusUser').action = `/pengaturan/hapus-user/${username}`;
     }
 </script>
+=======
+{% extends 'base.html' %}
+{% block title %}Pengaturan — EduGuard AI{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+    <h4 class="fw-bold mb-1">Pengaturan</h4>
+    <p class="text-muted mb-0">Kelola akun pengguna dan profil sekolah</p>
+</div>
+
+<div class="row g-4">
+
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3">
+                    <i class="bi bi-building me-2 text-primary"></i>Profil Sekolah
+                </h6>
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Nama Sekolah</label>
+                        <input type="text" class="form-control form-control-sm"
+                               value="SMA Negeri 1 Contoh" placeholder="Nama sekolah">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">NPSN</label>
+                        <input type="text" class="form-control form-control-sm"
+                               value="12345678" placeholder="Nomor NPSN">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Alamat</label>
+                        <textarea class="form-control form-control-sm" rows="2"
+                                  placeholder="Alamat sekolah">Jl. Pendidikan No. 1</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Kepala Sekolah</label>
+                        <input type="text" class="form-control form-control-sm"
+                               value="Drs. Budi Santoso, M.Pd" placeholder="Nama kepala sekolah">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Tahun Ajaran</label>
+                        <input type="text" class="form-control form-control-sm"
+                               value="2025/2026" placeholder="Tahun ajaran aktif">
+                    </div>
+                    <button type="button" class="btn btn-primary btn-sm"
+                            onclick="alert('Fitur simpan akan tersedia setelah integrasi database!')">
+                        <i class="bi bi-save me-1"></i>Simpan Perubahan
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0">
+                        <i class="bi bi-people me-2 text-primary"></i>
+                        Manajemen Pengguna
+                    </h6>
+                    <button class="btn btn-primary btn-sm"
+                            data-bs-toggle="modal" 
+                            data-bs-target="#modalTambahUser">
+                        <i class="bi bi-plus me-1"></i>Tambah User
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle small mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Username</th>
+                                <th>Nama</th>
+                                <th>Role</th>
+                                <th class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                       <tbody>
+    {% for u in daftar_user %}
+    <tr>
+        <td>
+            <code>{{ u.username }}</code>
+        </td>
+        <td>{{ u.nama }}</td>
+        <td>
+            {% if u.role == 'admin' %}
+                <span class="badge bg-danger">Admin</span>
+            {% elif u.role == 'guru_bk' %}
+                <span class="badge bg-primary">Guru BK</span>
+            {% else %}
+                <span class="badge bg-secondary">Kepsek</span>
+            {% endif %}
+        </td>
+        <td class="text-center">
+            <button class="btn btn-outline-warning btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalEditUser"
+                    data-username="{{ u.username }}"
+                    data-nama="{{ u.nama }}"
+                    data-role="{{ u.role }}"
+                    onclick="isiFormEdit(this)">
+                <i class="bi bi-pencil"></i>
+            </button>
+            
+            {% if u.username != current_user.username %}
+            <button class="btn btn-outline-danger btn-sm ms-1"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalHapusUser"
+                    data-username="{{ u.username }}"
+                    data-nama="{{ u.nama }}"
+                    onclick="isiFormHapus(this)">
+                <i class="bi bi-trash"></i>
+            </button>
+            {% else %}
+            <button class="btn btn-outline-secondary btn-sm ms-1" disabled
+                    title="Tidak bisa hapus akun sendiri">
+                <i class="bi bi-trash"></i>
+            </button>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+                    </table>
+                </div>
+
+                <div class="mt-3 p-2 bg-light rounded small text-muted">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Total <strong>{{ total_user }}</strong> pengguna terdaftar.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3">
+                    <i class="bi bi-sliders me-2 text-primary"></i>
+                    Pengaturan Threshold Risiko
+                </h6>
+                <p class="text-muted small mb-3">
+                    Atur batas nilai yang menentukan tingkat risiko siswa.
+                    Perubahan akan mempengaruhi hasil prediksi sistem.
+                </p>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="card bg-light border-0 p-3">
+                            <h6 class="small fw-bold mb-3">
+                                🎯 Threshold Kehadiran
+                            </h6>
+                            <div class="mb-2">
+                                <label class="form-label small">
+                                    Batas Risiko Tinggi 
+                                    <span class="text-danger">(di bawah nilai ini)</span>
+                                </label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" class="form-control" 
+                                           value="75" min="0" max="100">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                            <div class="mb-0">
+                                <label class="form-label small">
+                                    Batas Risiko Sedang
+                                    <span class="text-warning">(di bawah nilai ini)</span>
+                                </label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" class="form-control" 
+                                           value="85" min="0" max="100">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light border-0 p-3">
+                            <h6 class="small fw-bold mb-3">
+                                📝 Threshold Nilai Rata-rata
+                            </h6>
+                            <div class="mb-2">
+                                <label class="form-label small">
+                                    Batas Risiko Tinggi
+                                    <span class="text-danger">(di bawah nilai ini)</span>
+                                </label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" class="form-control" 
+                                           value="65" min="0" max="100">
+                                    <span class="input-group-text">poin</span>
+                                </div>
+                            </div>
+                            <div class="mb-0">
+                                <label class="form-label small">
+                                    Batas Risiko Sedang
+                                    <span class="text-warning">(di bawah nilai ini)</span>
+                                </label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" class="form-control" 
+                                           value="70" min="0" max="100">
+                                    <span class="input-group-text">poin</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm mt-3"
+                        onclick="alert('Fitur ini akan aktif setelah integrasi database!')">
+                    <i class="bi bi-save me-1"></i>Simpan Threshold
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal fade" id="modalTambahUser" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title fw-bold">
+                    <i class="bi bi-person-plus me-2"></i>Tambah Pengguna Baru
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('tambah_user') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">
+                            Username <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" name="username" class="form-control form-control-sm"
+                               placeholder="contoh: guru_bk2" required>
+                        <div class="form-text">Tidak bisa diubah setelah disimpan</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">
+                            Nama Lengkap <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" name="nama" class="form-control form-control-sm"
+                               placeholder="Nama lengkap pengguna" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Role</label>
+                        <select name="role" class="form-select form-select-sm">
+                            <option value="admin">Administrator</option>
+                            <option value="guru_bk">Guru BK</option>
+                            <option value="kepsek">Kepala Sekolah</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">
+                            Password <span class="text-danger">*</span>
+                        </label>
+                        <input type="password" name="password" class="form-control form-control-sm"
+                               placeholder="Password minimal 6 karakter" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm"
+                            data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-save me-1"></i>Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEditUser" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title fw-bold">
+                    <i class="bi bi-pencil me-2"></i>Edit Pengguna
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" id="formEditUser" action="">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Username</label>
+                        <input type="text" id="editUsername" class="form-control form-control-sm" disabled>
+                        <div class="form-text">Username tidak bisa diubah</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">
+                            Nama Lengkap <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" name="nama" id="editNama" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Role</label>
+                        <select name="role" id="editRole" class="form-select form-select-sm">
+                            <option value="admin">Administrator</option>
+                            <option value="guru_bk">Guru BK</option>
+                            <option value="kepsek">Kepala Sekolah</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Password Baru</label>
+                        <input type="password" name="password_baru" class="form-control form-control-sm"
+                               placeholder="Kosongkan jika tidak ingin mengubah password">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm"
+                            data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-warning btn-sm">
+                        <i class="bi bi-save me-1"></i>Update
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalHapusUser" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="modal-title fw-bold text-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Hapus User
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" id="formHapusUser" action="">
+                <div class="modal-body text-center">
+                    <p class="mb-1">Yakin ingin menghapus pengguna:</p>
+                    <p class="fw-bold fs-5 mb-1" id="hapusNama"></p>
+                    <code id="hapusUsername"></code>
+                    <p class="text-muted small mt-2 mb-0">
+                        Tindakan ini tidak bisa dibatalkan!
+                    </p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-secondary btn-sm"
+                            data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        <i class="bi bi-trash me-1"></i>Hapus
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Fungsi untuk memindahkan data user ke form modal edit secara otomatis
+    function isiFormEdit(btn) {
+        const username = btn.dataset.username;
+        const nama     = btn.dataset.nama;
+        const role     = btn.dataset.role;
+
+        document.getElementById('editUsername').value = username;
+        document.getElementById('editNama').value     = nama;
+        document.getElementById('editRole').value     = role;
+
+        // Mengatur attribute action form secara dinamis ke route edit_user Flask
+        document.getElementById('formEditUser').action = `/pengaturan/edit-user/${username}`;
+    }
+
+    // Fungsi untuk memindahkan data user ke modal konfirmasi hapus
+    function isiFormHapus(btn) {
+        const username = btn.dataset.username;
+        const nama     = btn.dataset.nama;
+
+        document.getElementById('hapusNama').textContent     = nama;
+        document.getElementById('hapusUsername').textContent = username;
+
+        // Mengatur attribute action form secara dinamis ke route hapus_user Flask
+        document.getElementById('formHapusUser').action = `/pengaturan/hapus-user/${username}`;
+    }
+</script>
+>>>>>>> a5eefe7d6f462e64ca378ddb8e53e2b9eaebe80b
 {% endblock %}

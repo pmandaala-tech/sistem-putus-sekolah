@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends 'base.html' %}
 {% block title %}Dashboard — EduGuard {% endblock %}
 
@@ -169,4 +170,177 @@
         }
     });
 </script>
+=======
+{% extends 'base.html' %}
+{% block title %}Dashboard — EduGuard {% endblock %}
+
+{% block content %}
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1">Dashboard Monitoring</h4>
+        <p class="text-muted mb-0">Sistem Prediksi Risiko Putus Sekolah</p>
+    </div>
+    <a href="{{ url_for('input_siswa') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Analisis Siswa Baru
+    </a>
+</div>
+
+<!-- Kartu Statistik -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-muted mb-1 small">Total Siswa</p>
+                    <h3 class="fw-bold mb-0">{{ statistik.total_siswa }}</h3>
+                </div>
+                <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                    <i class="bi bi-people fs-4 text-primary"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-muted mb-1 small">Risiko Tinggi</p>
+                    <h3 class="fw-bold mb-0 text-danger">{{ statistik.risiko_tinggi }}</h3>
+                </div>
+                <div class="bg-danger bg-opacity-10 p-3 rounded-circle">
+                    <i class="bi bi-exclamation-triangle fs-4 text-danger"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-muted mb-1 small">Risiko Sedang</p>
+                    <h3 class="fw-bold mb-0 text-warning">{{ statistik.risiko_sedang }}</h3>
+                </div>
+                <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
+                    <i class="bi bi-dash-circle fs-4 text-warning"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-muted mb-1 small">Risiko Rendah</p>
+                    <h3 class="fw-bold mb-0 text-success">{{ statistik.risiko_rendah }}</h3>
+                </div>
+                <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                    <i class="bi bi-check-circle fs-4 text-success"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grafik & Tabel -->
+<div class="row g-3">
+    <!-- Grafik Donut -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-4">
+            <h6 class="fw-bold mb-3">Distribusi Risiko Siswa</h6>
+            <canvas id="chartRisiko"></canvas>
+        </div>
+    </div>
+
+    <!-- Tabel Prioritas -->
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm p-4">
+            <div class="d-flex justify-content-between mb-3">
+                <h6 class="fw-bold mb-0">⚠️ Siswa Prioritas Intervensi</h6>
+                <a href="{{ url_for('daftar_siswa') }}" 
+                   class="btn btn-sm btn-outline-primary">Lihat Semua</a>
+            </div>
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nama Siswa</th>
+                        <th>Kelas</th>
+                        <th>Kehadiran</th>
+                        <th>Nilai</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Ahmad Fauzi</td>
+                        <td>Kelas X-A</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress flex-grow-1" style="height:6px">
+                                    <div class="progress-bar bg-danger" style="width:65%"></div>
+                                </div>
+                                <small>65%</small>
+                            </div>
+                        </td>
+                        <td>55</td>
+                        <td><span class="badge-tinggi">🔴 Tinggi</span></td>
+                        <td>
+                            <a href="{{ url_for('detail_siswa', nis='001') }}" 
+                               class="btn btn-sm btn-outline-danger">Detail</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Dewi Rahayu</td>
+                        <td>XI-B</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress flex-grow-1" style="height:6px">
+                                    <div class="progress-bar bg-warning" style="width:78%"></div>
+                                </div>
+                                <small>78%</small>
+                            </div>
+                        </td>
+                        <td>62</td>
+                        <td><span class="badge-sedang">🟡 Sedang</span></td>
+                        <td>
+                            <a href="#" class="btn btn-sm btn-outline-warning">Detail</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Grafik Donut Distribusi Risiko
+    const ctx = document.getElementById('chartRisiko').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Risiko Tinggi', 'Risiko Sedang', 'Risiko Rendah'],
+            datasets: [{
+                data: [
+                    Number('{{ statistik.risiko_tinggi }}'), 
+                    Number('{{ statistik.risiko_sedang }}'), 
+                    Number('{{ statistik.risiko_rendah }}')
+                ],
+                backgroundColor: ['#dc3545', '#ffc107', '#198754'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            cutout: '70%',
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+</script>
+>>>>>>> a5eefe7d6f462e64ca378ddb8e53e2b9eaebe80b
 {% endblock %}
